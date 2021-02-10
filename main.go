@@ -29,7 +29,7 @@ func (b *Battery) makeBasementColumn(amountOfBasements int, amountOfElevatorPerC
 			servedFloors[i] = floor
 			floor--
 		}
-
+		//Comment to push
 	}
 }
 
