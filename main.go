@@ -24,13 +24,13 @@ func (b *Battery) makeBasementColumn(amountOfBasements int, amountOfElevatorPerC
 	floor := -1
 	for i := 0; i < (amountOfBasements + 1); i++ {
 		if i == 0 {
-			servedFloors[i] = 1
+			servedFloors = append(servedFloors, 1)
 		} else {
-			servedFloors[i] = floor
+			servedFloors = append(servedFloors, floor)
 			floor--
 		}
-		//Comment to push
 	}
+	fmt.Printf("Floor: %v", servedFloors)
 }
 
 //Column class definition
