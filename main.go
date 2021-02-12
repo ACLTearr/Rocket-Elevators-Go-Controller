@@ -24,7 +24,7 @@ type Battery struct {
 	floorRequestButtonsList   []FloorRequestButton
 }
 
-//Making basement column
+//Method to create basement column
 func (battery *Battery) makeBasementColumn(amountOfBasements int, amountOfElevatorPerColumn int) {
 	var servedFloors []int
 	floor := -1
@@ -51,7 +51,7 @@ func (battery *Battery) makeBasementColumn(amountOfBasements int, amountOfElevat
 	columnID++
 }
 
-//Making columns
+//Method to create columns
 func (battery *Battery) makeColumns(amountOfColumns int, amountOfFloors int, amountOfElevatorPerColumn int) {
 	amountOfFloorsPerColumn := int(math.Ceil(float64(amountOfFloors / amountOfColumns)))
 	floor := 1
@@ -82,11 +82,10 @@ func (battery *Battery) makeColumns(amountOfColumns int, amountOfFloors int, amo
 		column.makeCallButtons(column.servedFloorsList, battery.amountOfBasements, column.isBasement)
 		battery.columnsList = append(battery.columnsList, column)
 		columnID++
-		// fmt.Printf("Floor: %v", servedFloors)
 	}
-	// fmt.Printf("/nColumn: %v", b.columnsList)
 }
 
+//Method to create basement floor request buttons
 func (battery *Battery) makeBasementFloorRequestButtons(amountOfBasements int) {
 	buttonFloor := -1
 	for i := 0; i < amountOfBasements; i++ {
@@ -99,9 +98,9 @@ func (battery *Battery) makeBasementFloorRequestButtons(amountOfBasements int) {
 		buttonFloor--
 		floorRequestButtonID++
 	}
-	// fmt.Printf("Floor Request Button: %v", b.floorRequestButtonsList)
 }
 
+//Method to create buttons to request a floor
 func (battery *Battery) makeFloorRequestButtons(amountOfFloors int) {
 	buttonFloor := 1
 	for i := 0; i < amountOfFloors; i++ {
@@ -114,21 +113,21 @@ func (battery *Battery) makeFloorRequestButtons(amountOfFloors int) {
 		buttonFloor++
 		floorRequestButtonID++
 	}
-	// fmt.Printf("Floor Request Button: %v", b.floorRequestButtonsList)
 }
 
 //Method to find the appropriate elevator within the appropriate column to serve user
 func (battery *Battery) assignElevator(requestedFloor int, direction string) {
-	stopFloor := 20
 	fmt.Println("A request for an elevator is made from the lobby for floor", requestedFloor, "going", direction, ".")
 	var column Column = battery.findBestColumn(requestedFloor)
 	fmt.Println("Column", column.ID, "is the column that can handle this request.")
 	var elevator Elevator = column.findBestElevator(1, direction)
+	stopFloor := elevator.floorRequestList[0]
 	fmt.Println("Elevator", elevator.ID, "is the best elevator, so it is sent.")
-	elevator.currentFloor = 1
-	elevator.doorController()
+	if elevator.status == "moving" {
+		elevator.moveElevator(stopFloor)
+	}
 	elevator.floorRequestList = append(elevator.floorRequestList, requestedFloor)
-	//SORT FLOOR LIST
+	elevator.sortFloorlist()
 	fmt.Println("Elevator is moving.")
 	elevator.moveElevator(stopFloor)
 	fmt.Println("Elevator is", elevator.status, ".")
@@ -140,6 +139,7 @@ func (battery *Battery) assignElevator(requestedFloor int, direction string) {
 	fmt.Println("Elevator is", elevator.status, ".")
 }
 
+//Method to find appropriate column to serve user
 func (battery *Battery) findBestColumn(requestedFloor int) Column {
 	var bestColumn Column
 	for _, column := range battery.columnsList {
@@ -151,6 +151,7 @@ func (battery *Battery) findBestColumn(requestedFloor int) Column {
 	return bestColumn
 }
 
+//method to check if users floor is in columns served floors
 func contains(a int, list []int) bool {
 	for _, b := range list {
 		if b == a {
@@ -187,9 +188,9 @@ func (column *Column) makeElevators(servedFloorsList []int, amountOfElevators in
 		column.elevatorsList = append(column.elevatorsList, elevator)
 		elevatorID++
 	}
-	// fmt.Printf("Elevator: %v", column.elevatorsList)
 }
 
+//Method to create call buttons
 func (column *Column) makeCallButtons(floorsServed []int, amountOfBasements int, isBasement bool) {
 	if isBasement {
 		buttonFloor := -1
@@ -217,14 +218,13 @@ func (column *Column) makeCallButtons(floorsServed []int, amountOfBasements int,
 			callButtonID++
 		}
 	}
-	// fmt.Printf("Call Button: %v", column.callButtonsList)
 }
 
+//When a user calls an elevator form a floor, not the lobby
 func (column *Column) requestElevator(userFloor int, direction string) {
 	fmt.Println("A request for an elevator is made from", userFloor, "going", direction, "to the lobby.")
 	var elevator Elevator = column.findBestElevator(userFloor, direction)
 	fmt.Println("Elevator", elevator.ID, "is the best elevator, so it is sent.")
-	elevator.doorController()
 	elevator.floorRequestList = append(elevator.floorRequestList, 1)
 	elevator.sortFloorlist()
 	fmt.Println("Elevator is moving.")
@@ -238,6 +238,7 @@ func (column *Column) requestElevator(userFloor int, direction string) {
 	fmt.Println("Elevator is", elevator.status, ".")
 }
 
+//Find best elevator to send
 func (column *Column) findBestElevator(floor int, direction string) Elevator {
 	requestedFloor := floor
 	requestedDirection := direction
@@ -399,6 +400,7 @@ type Door struct {
 	status string
 }
 
+//Door operation controller
 func (elevator *Elevator) doorController() {
 	overweight := false
 	obstruction := false
@@ -562,7 +564,7 @@ func main() {
 	battery.makeFloorRequestButtons(battery.amountOfFloors)
 
 	//Uncomment to run scenario 1
-	// battery.scenario1()
+	battery.scenario1()
 
 	//Uncomment to run scenario 2
 	// battery.scenario2()
