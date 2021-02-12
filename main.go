@@ -564,7 +564,7 @@ func main() {
 	battery.makeFloorRequestButtons(battery.amountOfFloors)
 
 	//Uncomment to run scenario 1
-	battery.scenario1()
+	// battery.scenario1()
 
 	//Uncomment to run scenario 2
 	// battery.scenario2()
